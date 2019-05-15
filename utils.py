@@ -1,4 +1,6 @@
 import json
+import re
+
 from requests import Session
 
 from exceptions import NoGitHubTokenException
@@ -61,7 +63,7 @@ class PullRequest:
         try:
             labels_json = self.labels
             labels_list = [l['name'] for l in labels_json]
-            if required_any is not None and not any(l in required_any for l in labels_list):
+            if required_any is not None and not any(l in required_any for l in labels_list) and not check_regex(required_any, words):
                 return False
             if required_all is not None and any(l not in labels_list for l in required_all):
                 return False
@@ -71,3 +73,10 @@ class PullRequest:
         except TypeError:
             print('self.labels was of unexpected format for PR event {}: {}'.format(self.issue_url, labels_json))
             return False
+
+    def check_regex(pattern, list):
+        result = False
+        for w in list: 
+            if (re.match(pattern, w) != None):
+                result = True
+        return result
